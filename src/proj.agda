@@ -113,6 +113,24 @@ evalB (case h f g) a | bot⊕ = fail
 evalB (case h f g) a | inL v = evalB f (insertB h a v)
 evalB (case h f g) a | inR v = evalB g (insertB h a v)
 
+data Proj : FAlg → Set where
+  one : Proj One
+  pairF : {a b : FAlg} → Proj a → Proj b → Proj (a ⊗ b)
+--  _⊕-id_ : {a b : FAlg} → Proj a → Proj b → Proj (a ⊕ b)
+--  _⊕-bot_ : {a b : FAlg} → Proj a → Proj b → Proj (a ⊕ b)
+ -- case-id : 
+  case-bot : {a b c : FAlg} → (h : Hole) → Proj (rep h a) → Proj (rep h b) → Proj (rep h (a ⊕ b))
+  id-bot : {a b c : FAlg} → (h : Hole) → Proj (rep h a) → Proj (rep h b) → Proj (rep h (a ⊕ b))
+  
+ProjtoFunc : {a : FAlg} → Proj a → a ↦ a
+ProjtoFunc {One} p = {!p!}
+ProjtoFunc {Zero} p = {!!}
+ProjtoFunc {a ⊕ a₁} p = {!!}
+ProjtoFunc {a ⊗ a₁} p = {!!}
+
+
+
+
    
 --   emp : {a : FAlg} → Zero ↦ a
 --   oneTo : {a : FAlg} → One ↦ Zero 
