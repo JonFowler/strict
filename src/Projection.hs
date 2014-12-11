@@ -29,28 +29,50 @@ data ProjBool
   = FailB
   | AbsB
   | StrB
+  | TrueB
+  | FalseB
+  | ATrueB
+  | AFalseB
   | IdB deriving (Eq, Show)
 
 instance Poset ProjBool where
   FailB <= _ = True
-  AbsB <= AbsB = True
-  StrB <= StrB = True
   _ <= IdB = True
-  _ <= _ = False
+  FalseB <= AFalseB = True
+  TrueB <= ATrueB = True
+  FalseB <= StrB = True
+  TrueB <= StrB = True
+  AbsB <= ATrueB  = True
+  AbsB <= AFalseB = True
+  a <= b
+    | a == b = True
+    | otherwise = False
+  
 
 instance LLattice ProjBool where
-  FailB /\ _ = FailB
-  _ /\ FailB = FailB
-  IdB /\ a = a
-  a /\ IdB = a
-  a /\ b = if a == b then a else FailB
+  AFalseB /\ StrB = FalseB
+  StrB /\ AFalseB = FalseB
+  ATrueB /\ StrB = TrueB
+  StrB /\ ATrueB = TrueB
+  a /\ b
+    | a <= b = a
+    | b <= a = b
+  _ /\ _ = FailB
+
+  bottom = FailB
+
 
 instance ULattice ProjBool where
-  FailB \/ a = a
-  a \/ FailB = a
-  IdB \/ _ = IdB 
-  _ \/ IdB = IdB
-  a \/ b = if a == b then a else IdB
+  AbsB \/ FalseB = AFalseB
+  FalseB \/ AbsB = AFalseB
+  AbsB \/ TrueB = ATrueB
+  TrueB \/ AbsB = ATrueB
+  a \/ b
+    | a <= b = b 
+    | b <= a = a 
+  _ \/ _ = IdB 
+
+  top = IdB
 
 (&&) :: Proj -> Proj -> Proj
 ProjB a && ProjB b = ProjB (a \/ b) 
