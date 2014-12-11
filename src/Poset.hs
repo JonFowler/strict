@@ -34,26 +34,17 @@ instance Poset a => LLattice (Bottom a) where
                           then Pure b
                           else Bottom
 
-data ProjBool
-  = IDBool
-  | BotBool
-  | TrueOnly
-  | FalseOnly
-
-projBool :: ProjBool -> Bottom Bool -> Bottom Bool
-projBool IDBool a = a
-projBool BotBool _ = Bottom
-projBool TrueOnly (Pure True) = Pure True
-projBool TrueOnly _ = Pure True
-projBool FalseOnly (Pure False) = Pure False
-projBool FalseOnly _ = Pure False
-
-
-
-
-data family Proj a 
-
-class Projection a where
-  idProj :: Proj a -> Proj a
-  botProj :: Proj a -> Proj a
+--projBool :: ProjBool -> Bottom Bool -> Bottom Bool
+--projBool IDBool a = a
+--projBool BotBool _ = Bottom
+--projBool TrueOnly (Pure True) = Pure True
+--projBool TrueOnly _ = Pure True
+--projBool FalseOnly (Pure False) = Pure False
+--projBool FalseOnly _ = Pure False
+--
+--data family Proj a 
+--
+--class Projection a where
+--  idProj :: Proj a -> Proj a
+--  botProj :: Proj a -> Proj a
 

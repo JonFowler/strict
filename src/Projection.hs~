@@ -1,0 +1,20 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
+module Projection where
+
+data Exp
+  = If Exp Exp Exp
+  | ValB Bool
+  | ValL List 
+  | Ap Fun [Exp]
+  | Var VarId
+
+data List = Emp | Cons Exp Exp
+
+data Fun 
+
+newtype VarId = VarId Int deriving (Eq, Show, Read, Num)
+
+  
+
+    
