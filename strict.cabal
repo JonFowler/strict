@@ -15,16 +15,18 @@ build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
-library
-  exposed-modules:     Poset
-  -- other-modules:       
-  -- other-extensions:    
-  build-depends:       base >=4.7 && <4.8
-  hs-source-dirs:      src
-  default-language:    Haskell2010
-
 test-suite tasty
   type: exitcode-stdio-1.0
   main-is: tasty.hs
-  build-depends: base, tasty, tasty-quickcheck
+  build-depends: base, tasty, tasty-quickcheck, derive
   hs-source-dirs: tests src
+
+library
+  exposed-modules:     Poset, Projection
+  -- other-modules:       
+  -- other-extensions:    
+  build-depends:       base >=4.7 && <4.8, tasty, tasty-quickcheck, derive
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+
+

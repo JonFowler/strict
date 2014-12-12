@@ -74,14 +74,14 @@ instance ULattice ProjBool where
 
   top = IdB
 
-(&&) :: Proj -> Proj -> Proj
-ProjB a && ProjB b = ProjB (a \/ b) 
-_ && _ = error "not ProjBool"
+(&+&) :: Proj -> Proj -> Proj
+ProjB a &+& ProjB b = ProjB (a \/ b) 
+_ &+& _ = error "not ProjBool"
 
        
 instance Lattice ProjBool
 
-data ProjList
+data ProjList = ConsL
   
 
 proj ::  Fun -> Int -> Proj -> Proj
