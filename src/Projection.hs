@@ -25,61 +25,56 @@ newtype VarId = VarId Int deriving (Eq, Show, Read, Num)
 data Proj = ProjB ProjBool
           | ProjL ProjList 
 
-data ProjBool
-  = FailB
-  | AbsB
-  | StrB
-  | TrueB
-  | FalseB
-  | ATrueB
-  | AFalseB
-  | IdB deriving (Eq, Show)
+data FlatProj a 
+  = FailF
+  | IdF
+  | AbsF
+  | StrF
+  | StrVal a
+  | AbsVal a
+  deriving (Eq, Show)
 
-instance Poset ProjBool where
-  FailB <= _ = True
-  _ <= IdB = True
-  FalseB <= AFalseB = True
-  TrueB <= ATrueB = True
-  FalseB <= StrB = True
-  TrueB <= StrB = True
-  AbsB <= ATrueB  = True
-  AbsB <= AFalseB = True
-  a <= b
-    | a == b = True
-    | otherwise = False
-  
+type ProjBool = FlatProj Bool
 
-instance LLattice ProjBool where
-  AFalseB /\ StrB = FalseB
-  StrB /\ AFalseB = FalseB
-  ATrueB /\ StrB = TrueB
-  StrB /\ ATrueB = TrueB
+
+instance Eq a => Poset (FlatProj a) where
+  FailF <= _ = True
+  _ <= IdF = True
+  AbsF <= AbsVal _ = True
+  StrVal _ <= StrF = True
+  StrVal a <= AbsVal b = a == b
+  a <= b = a == b 
+
+instance Eq a => LLattice (FlatProj a) where
   a /\ b
     | a <= b = a
     | b <= a = b
-  _ /\ _ = FailB
+  AbsVal _ /\ AbsVal _ = AbsF
+  AbsVal a /\ StrF = StrVal a
+  StrF /\ AbsVal a = StrVal a
+  _ /\ _ = FailF
 
-  bottom = FailB
-
-
-instance ULattice ProjBool where
-  AbsB \/ FalseB = AFalseB
-  FalseB \/ AbsB = AFalseB
-  AbsB \/ TrueB = ATrueB
-  TrueB \/ AbsB = ATrueB
+  bottom = FailF
+--
+--
+instance Eq a => ULattice (FlatProj a) where
   a \/ b
-    | a <= b = b 
-    | b <= a = a 
-  _ \/ _ = IdB 
+    | a <= b = b
+    | b <= a = a
+  StrVal _ \/ StrVal _ = StrF 
+  StrVal a \/ AbsF = AbsVal a
+  AbsF \/ StrVal a = AbsVal a
+  _ \/ _ = IdF
+ 
+  top = IdF
 
-  top = IdB
+instance Eq a => Lattice (FlatProj a)
 
-(&+&) :: Proj -> Proj -> Proj
-ProjB a &+& ProjB b = ProjB (a \/ b) 
-_ &+& _ = error "not ProjBool"
+--(&+&) :: Proj -> Proj -> Proj
+--ProjB a &+& ProjB b = ProjB (a \/ b) 
+--_ &+& _ = error "not ProjBool"
 
        
-instance Lattice ProjBool
 
 data ProjList = ConsL
   
