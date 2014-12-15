@@ -34,6 +34,48 @@ data FlatProj a
   | AbsVal a
   deriving (Eq, Show)
 
+data FlatVal a
+  = FailureF
+  | BottomF
+  | ValF a
+  deriving (Eq, Show)
+
+applyProj :: Eq a => FlatProj a -> FlatVal a -> FlatVal a
+applyProj FailF _ = FailureF
+applyProj IdF a = a
+applyProj AbsF FailureF = FailureF
+applyProj AbsF _ = BottomF
+applyProj StrF BottomF = FailureF
+applyProj StrF a = a
+applyProj (StrVal a) (ValF b) 
+  | a == b = ValF b
+applyProj (StrVal _) _ = FailureF
+applyProj (AbsVal a) (ValF b)
+  | a == b = ValF b
+applyProj (AbsVal _) FailureF = FailureF
+applyProj (AbsVal _) _ = BottomF
+
+instance Eq a => Poset (FlatVal a) where
+  FailureF <= _ = True
+  BottomF <= ValF _ = True
+  ValF a <= ValF b = a == b
+  _ <= _ = False
+
+class Finite a where
+  allVals :: [ a ]
+
+instance Finite Bool where
+  allVals = [False, True]
+
+instance Finite a => Finite (FlatVal a) where
+  allVals = [FailureF, BottomF] ++ [ValF a | a <- allVals  ]
+
+instance (Finite a, Eq b) => Eq (a -> b) where
+  f == g = and [f x == g x | x <- allVals ]
+
+instance (Finite a, Poset b) => Poset (a -> b) where
+  f <= g = and [ f x <= g x | x <- allVals ] 
+
 type ProjBool = FlatProj Bool
 
 
@@ -70,9 +112,11 @@ instance Eq a => ULattice (FlatProj a) where
 
 instance Eq a => Lattice (FlatProj a)
 
---(&+&) :: Proj -> Proj -> Proj
---ProjB a &+& ProjB b = ProjB (a \/ b) 
---_ &+& _ = error "not ProjBool"
+(&+&) :: Proj -> Proj -> Proj
+ProjB a &+& ProjB b = ProjB (a \/ b) 
+_ &+& _ = error "not ProjBool"
+
+
 
        
 

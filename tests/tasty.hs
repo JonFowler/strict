@@ -11,6 +11,12 @@ import Poset
 import Data.DeriveTH
 
 derive makeArbitrary ''FlatProj
+derive makeArbitrary ''FlatVal
+
+instance CoArbitrary a => CoArbitrary (FlatVal a) where
+  coarbitrary FailureF = variant (0 :: Int)
+  coarbitrary BottomF = variant (1 :: Int)
+  coarbitrary (ValF a) = variant (2 :: Int) . coarbitrary a
 
 main :: IO ()
 main = defaultMain tests 
@@ -22,10 +28,13 @@ tests = testGroup "allTests"
    [posetTests (undefined :: ProjBool) "ProjBool",
     uLatticeTests (undefined :: ProjBool) "ProjBool",
     lLatticeTests (undefined :: ProjBool) "ProjBool",
-    distributiveTests (undefined :: ProjBool) "ProjBool"
+    distributiveTests (undefined :: ProjBool) "ProjBool",
+    posetTests (undefined :: FlatVal Bool) "Flat Value Bool",
+    posetTests (undefined :: FlatVal Bool -> FlatVal Bool) "Flat Value Bool"
    ]
 
-
+instance (Finite a, Show a, Show b) => Show (a -> b) where
+  show f = show [ show x ++ " -> " ++ show (f x) | x <- allVals ]
 
 idempotency :: Eq a => (a -> a -> a) -> a -> Bool
 idempotency f a = f a a == a
