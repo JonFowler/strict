@@ -195,7 +195,7 @@ projB' (BVar x) y p
   | x == y = p
   | otherwise = AbsF
 projB' (BVal _) _ _ = AbsF
-projB' (BIf e0 e1 e2) x p = projB' e0 x StrF `andFlatProj` (projB' e1 x p \/ projB' e2 x p)
+projB' (BIf e0 e1 e2) x p = projB e0 x StrF `andFlatProj` (projB e1 x p \/ projB e2 x p)
 
 projB2' :: BoolExp -> BVar -> ProjBool -> ProjBool
 projB2' (BVar x) y p
@@ -203,8 +203,8 @@ projB2' (BVar x) y p
   | otherwise = AbsF
 projB2' (BVal _) _ _ = AbsF
 projB2' (BIf e0 e1 e2) x p =
-  (projB2' e0 x (StrVal True) `andFlatProj` projB2' e1 x p) \/
-  (projB2' e0 x (StrVal False) `andFlatProj` projB2' e2 x p)
+  (projB2 e0 x (StrVal True) `andFlatProj` projB2 e1 x p) \/
+  (projB2 e0 x (StrVal False) `andFlatProj` projB2 e2 x p)
 
 proj ::  Fun -> Int -> Proj -> Proj
 proj f i alpha = undefined f i alpha
