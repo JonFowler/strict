@@ -12,52 +12,57 @@ import Data.DeriveTH
 
 derive makeArbitrary ''FlatProj
 derive makeArbitrary ''FlatVal
-derive makeArbitrary ''BVar
-derive makeArbitrary ''BoolExp
+derive makeArbitrary ''Str
+derive makeArbitrary ''FailVal
+--derive makeArbitrary ''BVar
+--derive makeArbitrary ''BoolExp
 
 instance CoArbitrary a => CoArbitrary (FlatVal a) where
-  coarbitrary FailureF = variant (0 :: Int)
   coarbitrary BottomF = variant (1 :: Int)
   coarbitrary (ValF a) = variant (2 :: Int) . coarbitrary a
+
+instance CoArbitrary a => CoArbitrary (FailVal a) where
+  coarbitrary Fail = variant (1 :: Int)
+  coarbitrary (Pure a) = variant (2 :: Int) . coarbitrary a
 
 main :: IO ()
 main = defaultMain tests 
 
 type TestPoset = ProjBool
 
-evalProj :: BoolExp -> ProjBool -> ValBool -> ValBool -> ValBool -> Property
-evalProj e p b1 b2 b3 = let q = projB e Var1 p in
-  all (/= FailureF) [b1, b2, b3] ==>
-  applyProj p (evalB e b1 b2 b3) == applyProj p (evalB e (applyProj q b1) b2 b3)
-
-evalProj2 :: BoolExp -> ProjBool -> ValBool -> ValBool -> ValBool -> Property
-evalProj2 e p b1 b2 b3 = let q = projB2 e Var1 p in
-  all (/= FailureF) [b1, b2, b3] ==>
-  applyProj p (evalB e b1 b2 b3) == applyProj p (evalB e (applyProj q b1) b2 b3)
-
-projRulesEquiv :: BoolExp -> ProjBool -> Bool
-projRulesEquiv e p = projB e Var1 p == projB2 e Var1 p
+--evalProj :: BoolExp -> ProjBool -> ValBool -> ValBool -> ValBool -> Property
+--evalProj e p b1 b2 b3 = let q = projB e Var1 p in
+--  all (/= FailureF) [b1, b2, b3] ==>
+--  applyProj p (evalB e b1 b2 b3) == applyProj p (evalB e (applyProj q b1) b2 b3)
+--
+--evalProj2 :: BoolExp -> ProjBool -> ValBool -> ValBool -> ValBool -> Property
+--evalProj2 e p b1 b2 b3 = let q = projB2 e Var1 p in
+--  all (/= FailureF) [b1, b2, b3] ==>
+--  applyProj p (evalB e b1 b2 b3) == applyProj p (evalB e (applyProj q b1) b2 b3)
+--
+--projRulesEquiv :: BoolExp -> ProjBool -> Bool
+--projRulesEquiv e p = projB e Var1 p == projB2 e Var1 p
 
 tests :: TestTree
 tests = testGroup "allTests"
    [
---    posetTests (undefined :: ProjBool) "ProjBool",
---    uLatticeTests (undefined :: ProjBool) "ProjBool",
---    lLatticeTests (undefined :: ProjBool) "ProjBool",
---    distributiveTests (undefined :: ProjBool) "ProjBool",
---    posetTests (undefined :: FlatVal Bool) "Flat Value Bool",
---    posetTests (undefined :: FlatVal Bool -> FlatVal Bool) "Flat Value Bool",
---    testProperty "ProjBool represents projection" $
---      \x -> represents (<=) (<=) applyProj (x :: ProjBool),
---    testProperty "AndProj represents And projection" $
---      \x -> represents2 andFlatProj andFunc applyProj (x :: ProjBool),
+    posetTests (undefined :: ProjBool) "ProjBool",
+    uLatticeTests (undefined :: ProjBool) "ProjBool",
+    lLatticeTests (undefined :: ProjBool) "ProjBool",
+    distributiveTests (undefined :: ProjBool) "ProjBool",
+    posetTests (undefined :: FlatVal Bool) "Flat Value Bool",
+    posetTests (undefined :: FlatVal Bool -> FlatVal Bool) "Flat Value Bool",
+    testProperty "ProjBool represents projection" $
+      \x -> represents (<=) (<=) applyP (x :: ProjBool),
+    testProperty "AndProj represents And projection" $
+      \x -> represents2 andProj andFunc applyP (x :: ProjBool)
 --
 --    testProperty "Bool projection 2 works" $
 --      evalProj2,
 --    testProperty "Bool projection works" $
 --      evalProj,
-    testProperty "Projection rules equivalent" $
-      projRulesEquiv
+--    testProperty "Projection rules equivalent" $
+--      projRulesEquiv
    ]
 
 instance (Finite a, Show a, Show b) => Show (a -> b) where
